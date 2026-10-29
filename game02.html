@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>ㄅㄆㄇ 筆畫與運筆練習</title>
+<style>
+  :root {
+    --paper: #FFF9E6;
+    --ink: #424242;
+    --grid: #80D8FF;
+    --hi: #FFD54F;
+    --card: #FFFFFF;
+    --muted: #757575;
+    --primary: #0277BD;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  body {
+    background-color: var(--paper);
+    background-image: radial-gradient(#81D4FA 2px, transparent 2px);
+    background-size: 30px 30px;
+    color: var(--ink);
+    font-family: "Comic Sans MS", "Chalkboard SE", "Yuanti TC", "微軟正黑體", sans-serif;
+    padding: 20px 15px;
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: center;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 600px;
+    min-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .screen.on {
+    display: flex;
+  }
+
+  /* 標題與字體 */
+  h1 {
+    font-size: 2.2rem;
+    color: var(--primary);
+    text-shadow: 2px 2px 0px #B3E5FC;
+    text-align: center;
+    margin: 10px 0 5px;
+    letter-spacing: 1px;
+  }
+
+  .sub {
+    color: var(--muted);
+    text-align: center;
+    margin: 0 0 18px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  /* 主要按鈕 */
+  .chip {
+    border: 3px solid #B3E5FC;
+    background: #FFF;
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #B3E5FC;
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .chip:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #B3E5FC;
+  }
+
+  .note { font-size: 0.95rem; color: var(--muted); margin-top: 12px; line-height: 1.5; font-weight: bold; text-align: center; }
+
+  /* 37個符號點選手冊網格 */
+  .sym-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-height: 68vh;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 10px;
+  }
+  .sym-card {
+    background: #FFF;
+    border: 3px solid #80D8FF;
+    border-radius: 18px;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #80D8FF;
+    transition: transform 0.1s;
+  }
+  .sym-card:active { transform: translateY(2px); box-shadow: 0 2px 0 #80D8FF; }
+  .sym-card .s-char { font-size: 38px; font-weight: bold; color: #0277BD; line-height: 1; }
+  .sym-card .s-py { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* 運筆與寫字練習畫面 */
+  .rtop { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+  .rtop h2 { font-size: 1.6rem; color: var(--primary); margin: 0; }
+  .back {
+    border: none;
+    background: #B3E5FC;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #01579B;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 4px 0 #4FC3F7;
+  }
+  .back:active { transform: translateY(2px); box-shadow: 0 2px 0 #4FC3F7; }
+
+  .write-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  .canvas-box {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    background: #FFF;
+    border: 5px solid #80D8FF;
+    border-radius: 20px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.08);
+    touch-action: none;
+  }
+  .canvas-box::before, .canvas-box::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+  .canvas-box::before {
+    left: 0; right: 0; top: 50%;
+    border-top: 2px dashed rgba(128, 216, 255, 0.6);
+  }
+  .canvas-box::after {
+    top: 0; bottom: 0; left: 50%;
+    border-left: 2px dashed rgba(128, 216, 255, 0.6);
+  }
+  #drawCanvas {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 15px;
+    cursor: crosshair;
+  }
+  .ghost-char {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 180px;
+    color: rgba(2, 119, 189, 0.12);
+    font-weight: bold;
+    pointer-events: none;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 符號選擇主頁 -->
+  <section id="s-menu" class="screen on">
+    <h1>✍️ ㄅㄆㄇ 筆畫與運筆 ✍️</h1>
+    <p class="sub">點選任意注音符號，開始練習運筆寫字與發音！</p>
+
+    <div class="sym-grid" id="symGrid"></div>
+    <p class="note" id="ttsNote">點選符號即可練習寫字與聽發音喔！</p>
+  </section>
+
+  <!-- 筆畫運筆與寫字練習畫面 -->
+  <section id="s-write" class="screen">
+    <div class="rtop">
+      <button class="back" id="writeBack">← 返回列表</button>
+      <h2>筆順運筆練習</h2>
+    </div>
+    
+    <div class="write-container">
+      <div class="canvas-box">
+        <div class="ghost-char" id="ghostChar">ㄅ</div>
+        <canvas id="drawCanvas"></canvas>
+      </div>
+
+      <div style="display: flex; gap: 10px; width: 100%; max-width: 280px;">
+        <button class="chip" id="playWriteAudio" style="flex:1;">🔊 聽發音</button>
+        <button class="chip" id="clearCanvas" style="flex:1;">🧹 清除重寫</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const SYMS = [
+  // 聲母 21（呼讀音：bo po mo fo / de te ne le / ge ke he / ji qi xi / zhi chi shi ri / zi ci si）
+  {s:'ㄅ',py:'b',say:'波',t:'c'},{s:'ㄆ',py:'p',say:'坡',t:'c'},{s:'ㄇ',py:'m',say:'摸',t:'c'},{s:'ㄈ',py:'f',say:'佛',t:'c'},
+  {s:'ㄉ',py:'d',say:'德',t:'c'},{s:'ㄊ',py:'t',say:'特',t:'c'},{s:'ㄋ',py:'n',say:'訥',t:'c'},{s:'ㄌ',py:'l',say:'勒',t:'c'},
+  {s:'ㄍ',py:'g',say:'哥',t:'c'},{s:'ㄎ',py:'k',say:'科',t:'c'},{s:'ㄏ',py:'h',say:'喝',t:'c'},
+  {s:'ㄐ',py:'j',say:'雞',t:'c'},{s:'ㄑ',py:'q',say:'七',t:'c'},{s:'ㄒ',py:'x',say:'西',t:'c'},
+  {s:'ㄓ',py:'zh(zhi)',say:'知',t:'c'},{s:'ㄔ',py:'ch(chi)',say:'吃',t:'c'},{s:'ㄕ',py:'sh(shi)',say:'詩',t:'c'},{s:'ㄖ',py:'r(ri)',say:'日',t:'c'},
+  {s:'ㄗ',py:'z(zi)',say:'資',t:'c'},{s:'ㄘ',py:'c(ci)',say:'雌',t:'c'},{s:'ㄙ',py:'s(si)',say:'思',t:'c'},
+  // 介符 3
+  {s:'ㄧ',py:'i',say:'衣',t:'v'},{s:'ㄨ',py:'u',say:'烏',t:'v'},{s:'ㄩ',py:'ü',say:'迂',t:'v'},
+  // 韻符 13
+  {s:'ㄚ',py:'a',say:'啊',t:'v'},{s:'ㄛ',py:'o',say:'喔',t:'v'},{s:'ㄜ',py:'e',say:'鵝',t:'v'},{s:'ㄝ',py:'ê',say:'欸',t:'v'},
+  {s:'ㄞ',py:'ai',say:'哀',t:'v'},{s:'ㄟ',py:'ei',say:'誒',t:'v'},{s:'ㄠ',py:'ao',say:'凹',t:'v'},{s:'ㄡ',py:'ou',say:'歐',t:'v'},
+  {s:'ㄢ',py:'an',say:'安',t:'v'},{s:'ㄣ',py:'en',say:'恩',t:'v'},{s:'ㄤ',py:'ang',say:'骯',t:'v'},{s:'ㄥ',py:'eng',say:'鞥',t:'v'},
+  {s:'ㄦ',py:'er',say:'兒',t:'v'}
+];
+
+const BY = Object.fromEntries(SYMS.map(x=>[x.s,x]));
+
+const hasTTS = 'speechSynthesis' in window;
+let zhVoice = null;
+function pickVoice(){
+  if(!hasTTS) return;
+  const vs = speechSynthesis.getVoices();
+  zhVoice = vs.find(v=>/zh[-_]TW/i.test(v.lang)) ||
+            vs.find(v=>/zh[-_]HK/i.test(v.lang)) ||
+            vs.find(v=>/^zh/i.test(v.lang)) || null;
+}
+if(hasTTS){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+function speak(text, done){
+  if(!hasTTS) return;
+  player.pause();
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW';
+  if(zhVoice) u.voice = zhVoice;
+  u.rate = 0.7;
+  u.pitch = 1.05;
+  u.onend = u.onerror = ()=> { done && done(); };
+  speechSynthesis.speak(u);
+}
+function playSym(sym){
+  if(hasTTS) speechSynthesis.cancel();
+  if(!playRec(sym)) speak(BY[sym].say);
+}
+
+const $ = id => document.getElementById(id);
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $(id).classList.add('on');
+}
+
+// 渲染 37 個符號點選手冊網格
+function renderSymGrid(){
+  const grid = $('symGrid');
+  if(grid.children.length > 0) return;
+  SYMS.forEach(x=>{
+    const card = document.createElement('div');
+    card.className = 'sym-card';
+    card.innerHTML = `<div class="s-char">${x.s}</div><div class="s-py">${x.py}</div>`;
+    card.addEventListener('click', ()=>openWriteScreen(x.s));
+    grid.appendChild(card);
+  });
+}
+renderSymGrid();
+
+let activeWriteSym = 'ㄅ';
+function openWriteScreen(sym){
+  activeWriteSym = sym;
+  $('ghostChar').textContent = sym;
+  show('s-write');
+  initCanvas();
+  playSym(sym);
+}
+
+// 畫布運筆練習設定
+const canvas = $('drawCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+function initCanvas(){
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  clearDraw();
+}
+function clearDraw(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function getPos(e){
+  const r = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: clientX - r.left, y: clientY - r.top };
+}
+
+canvas.addEventListener('mousedown', e=>{ drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0277BD'; });
+canvas.addEventListener('mousemove', e=>{ if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+window.addEventListener('mouseup', ()=>drawing = false);
+
+canvas.addEventListener('touchstart', e=>{ drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0277BD'; e.preventDefault(); }, {passive:false});
+canvas.addEventListener('touchmove', e=>{ if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }, {passive:false});
+window.addEventListener('touchend', ()=>drawing = false);
+
+$('clearCanvas').addEventListener('click', clearDraw);
+$('playWriteAudio').addEventListener('click', ()=>playSym(activeWriteSym));
+$('writeBack').addEventListener('click', ()=>show('s-menu'));
+
+// 讀取共用資料庫與錄音
+const recs = new Map();
+const player = new Audio();
+const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+function unlockPlayer(){ try{ player.src = SILENT; player.play().catch(()=>{}); }catch(e){} }
+
+function setRec(k, blob){
+  const old = recs.get(k); if(old) URL.revokeObjectURL(old.url);
+  recs.set(k, {blob, url:URL.createObjectURL(blob)});
+}
+function playRec(sym){
+  const r = recs.get(sym); if(!r) return false;
+  player.pause();
+  player.src = r.url;
+  player.play().catch(()=>{});
+  return true;
+}
+
+function openDB(){
+  return new Promise(res=>{
+    try{
+      const r = indexedDB.open('zhuyin-voices', 1);
+      r.onupgradeneeded = ()=>r.result.createObjectStore('rec');
+      r.onsuccess = ()=>{ const db = r.result; const q = db.transaction('rec').objectStore('rec').openCursor();
+        q.onsuccess = ()=>{ const c = q.result; if(c){ setRec(c.key, c.value); c.continue(); } else res(); };
+        q.onerror = ()=>res();
+      };
+      r.onerror = ()=>res();
+    }catch(e){ res(); }
+  });
+}
+openDB();
+</script>
+</body>
+</html>
