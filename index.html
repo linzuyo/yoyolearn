@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>幼幼學習天地</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* 防止幼兒誤選取文字 */
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: "Comic Sans MS", "Chalkboard SE", "Yuanti TC", "微軟正黑體", sans-serif;
+            background-color: #fffffd;
+            background-image: radial-gradient(#FFDE85 2px, transparent 2px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* 頂部標題列與設定按鈕 */
+        header {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #FF5722;
+            text-shadow: 3px 3px 0px #FFE0B2;
+            letter-spacing: 2px;
+            margin: 0 auto;
+        }
+
+        .setting-toggle-btn {
+            background-color: #FFF;
+            border: 4px solid #FFD54F;
+            font-size: 1.8rem;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #FFA000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+        .setting-toggle-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #FFA000;
+        }
+
+        /* 6塊卡片選單網格 (適合平板橫板/直板) */
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 960px;
+            padding: 10px;
+        }
+
+        /* 卡片按鈕基礎樣式 */
+        .card-btn {
+            background-color: #FFFFFF;
+            border-radius: 30px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 10px 0px rgba(0,0,0,0.1), 0 15px 20px rgba(0,0,0,0.05);
+            border: 6px solid #FFF;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .card-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
+        }
+
+        .card-icon {
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #424242;
+        }
+
+        /* 各卡片主題色彩 */
+        .card-1 { border-color: #FF8A80; background: #FFEBEE; }
+        .card-2 { border-color: #80D8FF; background: #E1F5FE; }
+        .card-3 { border-color: #A7FFEB; background: #E0F2F1; }
+        .card-4 { border-color: #FFE57F; background: #FFFDE7; }
+        .card-5 { border-color: #EA80FC; background: #F3E5F5; }
+        .card-6 { border-color: #FFD180; background: #FFF3E0; }
+
+        /* 遊戲全螢幕彈窗 (Modal) */
+        .game-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .game-modal.active {
+            display: flex;
+        }
+
+        .modal-header {
+            height: 60px;
+            background-color: #FF5722;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background-color: #FFD54F;
+            color: #333;
+            border: none;
+            padding: 8px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #F57F17;
+        }
+
+        .close-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #F57F17;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100vh - 60px);
+            border: none;
+            background-color: #FFFFFF;
+        }
+
+        /* 設定彈窗畫面樣式 */
+        .setting-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .setting-modal.active { display: flex; }
+        .setting-card {
+            background: #FFF9E6;
+            width: 90%;
+            max-width: 600px;
+            height: 85vh;
+            border-radius: 30px;
+            border: 6px solid #FFD54F;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 0 10px 0 #F57F17;
+            position: relative;
+        }
+        .setting-menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .setting-menu-btn {
+            background: #FFF;
+            border: 4px solid #80D8FF;
+            padding: 18px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0277BD;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #80D8FF;
+            text-align: left;
+            transition: transform 0.1s;
+        }
+        .setting-menu-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #80D8FF; }
+        .setting-menu-btn:disabled {
+            background: #ECEFF1;
+            border-color: #CFD8DC;
+            color: #B0BEC5;
+            box-shadow: 0 6px 0 #B0BEC5;
+            cursor: not-allowed;
+        }
+
+        /* 錄音內頁樣式 */
+        .sub-setting-view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+        .sub-setting-view.active { display: flex; }
+        .rtop { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .rtop h2 { font-size: 1.5rem; color: #0277BD; margin: 0; flex: 1; }
+        .back-s-btn {
+            border: none;
+            background: #B3E5FC;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #01579B;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 20px;
+            box-shadow: 0 4px 0 #4FC3F7;
+        }
+        .back-s-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #4FC3F7; }
+        .rhead { font-size: 1.1rem; font-weight: bold; color: #01579B; margin: 10px 0 6px; }
+        .rlist-box { flex: 1; overflow-y: auto; padding-right: 4px; }
+        .rrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #FFF;
+            border: 3px solid #B3E5FC;
+            border-radius: 18px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 0 #B3E5FC;
+        }
+        .rrow.has { border-color: #A5D6A7; box-shadow: 0 4px 0 #A5D6A7; }
+        .rrow.live { border-color: #FF8A80; background: #FFEBEE; box-shadow: 0 4px 0 #FF8A80; }
+        .rsym { font-size: 28px; font-weight: bold; width: 40px; text-align: center; color: #0277BD; }
+        .rpy { flex: 1; font-size: 13px; color: #757575; }
+        .rpy b { display: block; color: #424242; font-size: 15px; }
+        .ibtn {
+            border: 3px solid #B0BEC5;
+            background: #FFF;
+            border-radius: 12px;
+            min-width: 40px;
+            height: 38px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #B0BEC5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ibtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #B0BEC5; }
+        .ibtn.rec { background: #FF5252; border-color: #D32F2F; color: #FFF; box-shadow: 0 3px 0 #D32F2F; font-size: 13px; font-weight: bold; }
+        .ibtn:disabled { opacity: 0.4; cursor: default; }
+        #recWarn { color: #D32F2F; font-size: 0.9rem; font-weight: bold; margin: 4px 0; }
+        .rfoot { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .chip-btn {
+            border: 3px solid #B3E5FC;
+            background: #FFF;
+            color: #424242;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #B3E5FC;
+            text-align: center;
+        }
+        .chip-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #B3E5FC; }
+        .note { font-size: 0.9rem; color: #757575; line-height: 1.4; font-weight: bold; text-align: center; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="width: 55px;"></div>
+        <h1>🎈 幼幼學習天地 🎈</h1>
+        <button class="setting-toggle-btn" onclick="openSetting()" aria-label="設定">⚙️</button>
+    </header>
+
+    <main class="menu-container">
+        <!-- 卡片 1：ㄅㄆㄇ聽力測驗 -->
+        <div class="card-btn card-1" onclick="openGame('game01.html', 'ㄅㄆㄇ聽力小遊戲')">
+            <div class="card-icon">🎧</div>
+            <div class="card-title">ㄅㄆㄇ聽力測驗</div>
+        </div>
+
+        <!-- 卡片 2：ㄅㄆㄇ筆畫練習 -->
+        <div class="card-btn card-2" onclick="openGame('game02.html', 'ㄅㄆㄇ筆畫練習')">
+            <div class="card-icon">✍️</div>
+            <div class="card-title">ㄅㄆㄇ筆畫練習</div>
+        </div>
+
+        <!-- 卡片 3：待開放 -->
+        <div class="card-btn card-3" onclick="alert('遊戲準備中！')">
+            <div class="card-icon">🍎</div>
+            <div class="card-title">待開放</div>
+        </div>
+
+        <!-- 卡片 4：待開放 -->
+        <div class="card-btn card-4" onclick="alert('遊戲準備中！')">
+            <div class="card-icon">🔢</div>
+            <div class="card-title">待開放</div>
+        </div>
+
+        <!-- 卡片 5：待開放 -->
+        <div class="card-btn card-5" onclick="alert('遊戲準備中！')">
+            <div class="card-icon">🎵</div>
+            <div class="card-title">待開放</div>
+        </div>
+
+        <!-- 卡片 6：待開放 -->
+        <div class="card-btn card-6" onclick="alert('遊戲準備中！')">
+            <div class="card-icon">🧩</div>
+            <div class="card-title">待開放</div>
+        </div>
+    </main>
+
+    <!-- 遊戲彈窗容器 -->
+    <div class="game-modal" id="gameModal">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">遊戲中</span>
+            <button class="close-btn" onclick="closeGame()">🏠 返回選單</button>
+        </div>
+        <iframe id="gameFrame" src="" allow="autoplay"></iframe>
+    </div>
+
+    <!-- 設定彈窗容器 -->
+    <div class="setting-modal" id="settingModal">
+        <div class="setting-card">
+            <!-- 設定主選單 -->
+            <div id="settingMainView" style="display: flex; flex-direction: column; height: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="color: #E65100; font-size: 1.6rem;">⚙️ 系統設定</h2>
+                    <button class="close-btn" onclick="closeSetting()" style="padding: 6px 16px; font-size: 1rem;">✕ 關閉</button>
+                </div>
+                <div class="setting-menu-list">
+                    <button class="setting-menu-btn" onclick="openSubSetting('recView')">🎙 注音符號聲音錄製設定 <span id="recCountBadge" style="color:#E65100;"></span></button>
+                    <button class="setting-menu-btn" disabled>🔒 設定功能二（敬請期待）</button>
+                    <button class="setting-menu-btn" disabled>🔒 設定功能三（敬請期待）</button>
+                </div>
+            </div>
+
+            <!-- 子設定：統一錄音介面 -->
+            <div id="recView" class="sub-setting-view">
+                <div class="rtop">
+                    <button class="back-s-btn" onclick="backSettingMain()">← 返回設定</button>
+                    <h2>注音符號聲音錄製</h2>
+                </div>
+                <p class="note" style="margin:0 0 6px">請在安靜處錄音（每個音最長 4 秒）。錄好的音效會同步套用到聽力與筆畫練習中！</p>
+                <div id="recWarn"></div>
+                <div class="rlist-box" id="recList"></div>
+                <div class="rfoot">
+                    <button class="chip-btn" id="expBtn">匯出備份</button>
+                    <label class="chip-btn" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">匯入備份<input type="file" id="impFile" accept="application/json,.json" style="display:none"></label>
+                </div>
+                <p class="note" id="storeNote" style="margin-top:6px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SYMS = [
+           {s:'ㄅ',py:'b',say:'波',t:'c'},{s:'ㄆ',py:'p',say:'坡',t:'c'},{s:'ㄇ',py:'m',say:'摸',t:'c'},{s:'ㄈ',py:'f',say:'佛',t:'c'},
+          {s:'ㄉ',py:'d',say:'德',t:'c'},{s:'ㄊ',py:'t',say:'特',t:'c'},{s:'ㄋ',py:'n',say:'訥',t:'c'},{s:'ㄌ',py:'l',say:'勒',t:'c'},
+          {s:'ㄍ',py:'g',say:'哥',t:'c'},{s:'ㄎ',py:'k',say:'科',t:'c'},{s:'ㄏ',py:'h',say:'喝',t:'c'},
+          {s:'ㄐ',py:'j',say:'雞',t:'c'},{s:'ㄑ',py:'q',say:'七',t:'c'},{s:'ㄒ',py:'x',say:'西',t:'c'},
+          {s:'ㄓ',py:'zh(zhi)',say:'知',t:'c'},{s:'ㄔ',py:'ch(chi)',say:'吃',t:'c'},{s:'ㄕ',py:'sh(shi)',say:'詩',t:'c'},{s:'ㄖ',py:'r(ri)',say:'日',t:'c'},
+          {s:'ㄗ',py:'z(zi)',say:'資',t:'c'},{s:'ㄘ',py:'c(ci)',say:'雌',t:'c'},{s:'ㄙ',py:'s(si)',say:'思',t:'c'},
+          {s:'ㄧ',py:'i',say:'衣',t:'v'},{s:'ㄨ',py:'u',say:'烏',t:'v'},{s:'ㄩ',py:'ü',say:'迂',t:'v'},
+          {s:'ㄚ',py:'a',say:'啊',t:'v'},{s:'ㄛ',py:'o',say:'喔',t:'v'},{s:'ㄜ',py:'e',say:'鵝',t:'v'},{s:'ㄝ',py:'ê',say:'欸',t:'v'},
+          {s:'ㄞ',py:'ai',say:'哀',t:'v'},{s:'ㄟ',py:'ei',say:'誒',t:'v'},{s:'ㄠ',py:'ao',say:'凹',t:'v'},{s:'ㄡ',py:'ou',say:'歐',t:'v'},
+          {s:'ㄢ',py:'an',say:'安',t:'v'},{s:'ㄣ',py:'en',say:'恩',t:'v'},{s:'ㄤ',py:'ang',say:'骯',t:'v'},{s:'ㄥ',py:'eng',say:'鞥',t:'v'},
+          {s:'ㄦ',py:'er',say:'兒',t:'v'}
+        ];
+        const BY = Object.fromEntries(SYMS.map(x=>[x.s,x]));
+
+        // 開啟遊戲彈窗
+        function openGame(url, title) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('gameFrame').src = url;
+            document.getElementById('gameModal').classList.add('active');
+        }
+
+        // 關閉遊戲彈窗
+        function closeGame() {
+            document.getElementById('gameModal').classList.remove('active');
+            document.getElementById('gameFrame').src = '';
+        }
+
+        // 設定選單控制
+        function openSetting() {
+            document.getElementById('settingModal').classList.add('active');
+            backSettingMain();
+            renderRec();
+        }
+        function closeSetting() {
+            if(recSym) stopRec();
+            player.pause();
+            document.getElementById('settingModal').classList.remove('active');
+        }
+        function openSubSetting(viewId) {
+            document.getElementById('settingMainView').style.display = 'none';
+            document.querySelectorAll('.sub-setting-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+        function backSettingMain() {
+            if(recSym) stopRec();
+            player.pause();
+            document.querySelectorAll('.sub-setting-view').forEach(v => v.classList.remove('active'));
+            document.getElementById('settingMainView').style.display = 'flex';
+        }
+
+        // 統一錄音與資料庫機制
+        const recs = new Map();
+        const player = new Audio();
+        let db = null;
+        const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+        function unlockPlayer(){ try{ player.src = SILENT; player.play().catch(()=>{}); }catch(e){} }
+
+        function setRec(k, blob){
+            const old = recs.get(k); if(old) URL.revokeObjectURL(old.url);
+            recs.set(k, {blob, url:URL.createObjectURL(blob)});
+        }
+        function playRec(sym){
+            const r = recs.get(sym); if(!r) return false;
+            player.pause();
+            player.src = r.url;
+            player.play().catch(()=>{});
+            return true;
+        }
+
+        function openDB(){
+            return new Promise(res=>{
+                try{
+                    const r = indexedDB.open('zhuyin-voices', 1);
+                    r.onupgradeneeded = ()=>r.result.createObjectStore('rec');
+                    r.onsuccess = ()=>{ db = r.result; res(); };
+                    r.onerror = ()=>res();
+                }catch(e){ res(); }
+            });
+        }
+        function dbPut(k, blob){ if(!db) return; try{ db.transaction('rec','readwrite').objectStore('rec').put(blob, k); }catch(e){} }
+        function dbDel(k){ if(!db) return; try{ db.transaction('rec','readwrite').objectStore('rec').delete(k); }catch(e){} }
+        function dbLoadAll(){
+            return new Promise(res=>{
+                if(!db) return res();
+                try{
+                    const q = db.transaction('rec').objectStore('rec').openCursor();
+                    q.onsuccess = ()=>{ const c = q.result; if(c){ setRec(c.key, c.value); c.continue(); } else res(); };
+                    q.onerror = ()=>res();
+                }catch(e){ res(); }
+            });
+        }
+
+        let mr = null, recSym = null, chunks = [], stream = null, recTimer = null;
+        async function startRec(sym){
+            unlockPlayer();
+            if(!navigator.mediaDevices || !window.MediaRecorder){
+                document.getElementById('recWarn').textContent = '這個瀏覽器不支援錄音。'; return;
+            }
+            try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+            catch(e){
+                document.getElementById('recWarn').textContent = '無法使用麥克風，請確認已允許麥克風權限。'; return;
+            }
+            document.getElementById('recWarn').textContent = '';
+            player.pause();
+            chunks = []; recSym = sym;
+            mr = new MediaRecorder(stream);
+            mr.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+            mr.onstop = ()=>{
+                clearTimeout(recTimer);
+                stream.getTracks().forEach(tr=>tr.stop());
+                const blob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'});
+                const s = recSym; recSym = null;
+                if(blob.size > 0){ setRec(s, blob); dbPut(s, blob); }
+                renderRec(); playRec(s);
+            };
+            mr.start();
+            recTimer = setTimeout(stopRec, 4000);
+            renderRec();
+        }
+        function stopRec(){ if(mr && mr.state !== 'inactive') mr.stop(); }
+
+        function renderRec(){
+            const box = document.getElementById('recList'); box.innerHTML = '';
+            const heads = {0:'聲符（聲母）', 21:'介符（介母）', 24:'韻符（韻母）'};
+            SYMS.forEach((x, i)=>{
+                if(heads[i]){ const h = document.createElement('div'); h.className = 'rhead'; h.textContent = heads[i]; box.appendChild(h); }
+                const has = recs.has(x.s), live = recSym === x.s;
+                const row = document.createElement('div');
+                row.className = 'rrow' + (has ? ' has' : '') + (live ? ' live' : '');
+                row.innerHTML = '<div class="rsym">'+x.s+'</div><div class="rpy"><b>'+x.py+'</b>'+(live ? '錄音中…' : has ? '已錄自己的聲音' : '使用預設語音')+'</div>';
+                
+                const play = document.createElement('button');
+                play.className = 'ibtn'; play.textContent = '▶'; play.setAttribute('aria-label','試聽 '+x.s);
+                play.disabled = !!recSym;
+                play.onclick = ()=>playRec(x.s);
+                
+                const rb = document.createElement('button');
+                rb.className = 'ibtn' + (live ? ' rec' : '');
+                rb.textContent = live ? '■ 停止' : '●';
+                rb.setAttribute('aria-label', (live ? '停止錄音 ' : '錄音 ') + x.s);
+                rb.disabled = !!recSym && !live;
+                rb.onclick = ()=> live ? stopRec() : startRec(x.s);
+                
+                row.append(play, rb);
+                if(has){
+                    const del = document.createElement('button');
+                    del.className = 'ibtn'; del.textContent = '🗑'; del.setAttribute('aria-label','刪除 '+x.s+' 的錄音');
+                    del.disabled = !!recSym;
+                    del.onclick = ()=>{ const r = recs.get(x.s); if(r) URL.revokeObjectURL(r.url); recs.delete(x.s); dbDel(x.s); renderRec(); };
+                    row.append(del);
+                }
+                box.appendChild(row);
+            });
+            updateRecCount();
+        }
+        function updateRecCount(){
+            const txt = recs.size ? '（已錄 '+recs.size+'/37）' : '';
+            document.getElementById('recCountBadge').textContent = txt;
+        }
+
+        function blobToDataURL(b){ return new Promise(res=>{ const f = new FileReader(); f.onload = ()=>res(f.result); f.readAsDataURL(b); }); }
+        function dataURLToBlob(u){
+            const [h, b64] = u.split(','); const mime = (h.match(/:(.*?);/)||[])[1] || 'audio/webm';
+            const bin = atob(b64); const arr = new Uint8Array(bin.length);
+            for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+            return new Blob([arr], {type:mime});
+        }
+        document.getElementById('expBtn').addEventListener('click', async ()=>{
+            if(!recs.size){ document.getElementById('recWarn').textContent = '還沒有錄音可以匯出喔！'; return; }
+            const out = {};
+            for(const [k, v] of recs) out[k] = await blobToDataURL(v.blob);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], {type:'application/json'}));
+            a.download = 'zhuyin-voices.json';
+            document.body.appendChild(a); a.click(); a.remove();
+            document.getElementById('recWarn').textContent = '';
+        });
+        document.getElementById('impFile').addEventListener('change', async e=>{
+            const f = e.target.files[0]; if(!f) return;
+            try{
+                const obj = JSON.parse(await f.text()); let n = 0;
+                for(const k of Object.keys(obj)){
+                    if(!BY[k] || typeof obj[k] !== 'string') continue;
+                    const blob = dataURLToBlob(obj[k]); setRec(k, blob); dbPut(k, blob); n++;
+                }
+                document.getElementById('recWarn').textContent = '已成功匯入 ' + n + ' 個錄音檔。';
+            }catch(err){ document.getElementById('recWarn').textContent = '匯入失敗，請確認檔案格式是否正確。'; }
+            e.target.value = ''; renderRec();
+        });
+
+        openDB().then(dbLoadAll).then(()=>{
+            document.getElementById('storeNote').textContent = db
+                ? '錄音會安全地存放在目前的瀏覽器中。'
+                : '此環境無法存取本機資料庫，關閉頁面後錄音可能會消失，建議定期匯出備份。';
+            updateRecCount();
+        });
+    </script>
+</body>
+</html>
