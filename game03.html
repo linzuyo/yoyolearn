@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ㄅㄆㄇ詞彙複習與測驗</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: "Comic Sans MS", "Chalkboard SE", "Yuanti TC", "微軟正黑體", sans-serif;
+            background-color: #fffffd;
+            background-image: radial-gradient(#FFDE85 2px, transparent 2px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* 頂部標題與通用的立體按鈕風格 */
+        header {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.3rem;
+            color: #FF5722;
+            text-shadow: 3px 3px 0px #FFE0B2;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .btn-action {
+            background-color: #FFF;
+            border: 4px solid #80D8FF;
+            color: #0277BD;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #4FC3F7;
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-action:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #4FC3F7;
+        }
+
+        .btn-action.btn-orange {
+            border-color: #FFD54F;
+            color: #E65100;
+            box-shadow: 0 5px 0 #FFA000;
+        }
+        .btn-action.btn-orange:active {
+            box-shadow: 0 2px 0 #FFA000;
+        }
+
+        /* 選單卡片容器（風格同 index.html） */
+        .menu-container {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 40px;
+        }
+
+        .card-menu-btn {
+            background-color: #FFFFFF;
+            border-radius: 30px;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 0px rgba(0,0,0,0.1), 0 15px 20px rgba(0,0,0,0.05);
+            border: 6px solid #FFF;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            min-width: 240px;
+            flex: 1;
+        }
+
+        .card-menu-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
+        }
+
+        .card-menu-btn .icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .card-menu-btn .title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #424242;
+        }
+
+        .btn-style-1 { border-color: #A7FFEB; background: #E0F2F1; }
+        .btn-style-2 { border-color: #FFE57F; background: #FFFDE7; }
+
+        /* 區域切換 */
+        .area {
+            display: none;
+            width: 100%;
+            max-width: 960px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 網格選擇：注音選單 */
+        .pick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 15px;
+            width: 100%;
+            padding: 10px;
+        }
+
+        .pick-card {
+            background: #FFFFFF;
+            color: #FF5722;
+            font-size: 2.4rem;
+            font-weight: bold;
+            aspect-ratio: 1;
+            border: 5px solid #FFE57F;
+            background-color: #FFFDE7;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #FFCA28;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+
+        .pick-card:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #FFCA28;
+        }
+
+        /* 單個注音詳細視圖 */
+        .nav-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .big-sym-btn {
+            font-size: 5rem;
+            color: #FF5722;
+            font-weight: bold;
+            cursor: pointer;
+            background: #FFEBEE;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px dashed #FF8A80;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05);
+            transition: transform 0.1s;
+        }
+
+        .big-sym-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 詞彙卡片網格 */
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+            padding: 10px;
+        }
+
+        .word-card {
+            background: #FFFFFF;
+            border: 5px solid #80D8FF;
+            background-color: #E1F5FE;
+            border-radius: 25px;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #4FC3F7;
+            transition: transform 0.1s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .word-card:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #4FC3F7;
+        }
+
+        .word-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: contain; /* 複習頁面也改為 contain 確保圖片不被卡住 */
+            background: #FFFFFF;
+        }
+
+        .word-card .wt {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0277BD;
+            padding: 12px 10px;
+            background: #FFFFFF;
+        }
+
+        /* 遊戲測驗卡片風格 */
+        .quiz-card {
+            background: #FFF9E6;
+            border: 6px solid #FFD54F;
+            border-radius: 35px;
+            padding: 30px 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 10px 0 #F57F17;
+            margin-top: 10px;
+        }
+
+        .target-sym {
+            font-size: 5.5rem;
+            color: #FF5722;
+            margin: 10px 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 2px 2px 0 #FFE0B2;
+            display: inline-block;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            background: #FFFFFF;
+            color: #424242;
+            border: 4px solid #B3E5FC;
+            border-radius: 20px;
+            overflow: hidden;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #4FC3F7;
+            text-align: left;
+            transition: transform 0.1s;
+            padding: 0;
+        }
+
+        .option-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #4FC3F7;
+        }
+
+        /* 這裡已將尺寸放大至 150px x 150px，並使用 contain 確保整張圖完整顯示 */
+        .option-btn img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain; 
+            background: #FAFAFA;
+            flex-shrink: 0;
+        }
+
+        .option-btn span {
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        .feedback-text {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🍎 ㄅㄆㄇ詞彙複習 🍎</h1>
+    </header>
+
+    <!-- 主選單卡片 -->
+    <div id="menu" class="menu-container">
+        <div class="card-menu-btn btn-style-1" onclick="startReview()">
+            <div class="icon">📖</div>
+            <div class="title">複習注音</div>
+        </div>
+        <div class="card-menu-btn btn-style-2" onclick="startQuiz()">
+            <div class="icon">🎮</div>
+            <div class="title">找詞彙遊戲</div>
+        </div>
+    </div>
+
+    <!-- 複習：選擇注音列表 -->
+    <div id="reviewList" class="area">
+        <div style="width:100%; margin-bottom: 15px;">
+            <button class="btn-action btn-orange" onclick="home()">🏠 主選單</button>
+        </div>
+        <div class="pick-grid" id="pickGrid"></div>
+    </div>
+
+    <!-- 複習：單個注音詞彙頁面 -->
+    <div id="reviewOne" class="area">
+        <div class="nav-bar">
+            <button class="btn-action btn-orange" onclick="startReview()">⬅ 選注音</button>
+            <button class="btn-action" onclick="stepSym(-1)">◀ 上一個</button>
+            <button class="btn-action" onclick="stepSym(1)">下一個 ▶</button>
+        </div>
+        <div class="big-sym-btn" id="bigSym" onclick="playAudio(data[idx].b)"></div>
+        <div class="words-grid" id="words"></div>
+    </div>
+
+    <!-- 找詞彙遊戲 -->
+    <div id="quiz" class="area">
+        <div style="width:100%; max-width:550px; margin-bottom: 15px;">
+            <button class="btn-action btn-orange" onclick="home()">🏠 主選單</button>
+        </div>
+        <div class="quiz-card">
+            <div style="font-size: 1.3rem; color: #757575; font-weight: bold;">請聽聲音，找出對應的詞彙：</div>
+            <div class="target-sym" id="target" onclick="playAudio(cur.b)">ㄅ</div>
+            <div class="options-list" id="opts"></div>
+            <div class="feedback-text" id="fb"></div>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            {b:"ㄅ",v:[{t:"剝(ㄅㄛ)香(ㄒㄧㄤ)蕉(ㄐㄧㄠ)",e:"images/b_banana.jpg"},{t:"菠(ㄅㄛ)菜(ㄘㄞˋ)",e:"images/b_spinach.jpg"},{t:"蘿(ㄌㄨㄛˊ)蔔(ㄅㄛ˙)",e:"images/b_radish.jpg"}]},
+            {b:"ㄆ",v:[{t:"潑(ㄆㄛ)潑(ㄆㄛ)水(ㄕㄨㄟˇ)",e:"images/p_water.jpg"},{t:"皮(ㄆㄧ)包(ㄅㄠ)",e:"images/p_bag.jpg"},{t:"葡(ㄆㄨˊ)萄(ㄊㄠˊ)",e:"images/p_grape.jpg"}]},
+            {b:"ㄇ",v:[{t:"摸(ㄇㄛ)摸(ㄇㄛ)頭(ㄊㄡˊ)",e:"images/m_head.jpg"},{t:"抹(ㄇㄛˇ)布(ㄅㄨˋ)",e:"images/m_rag.jpg"},{t:"墨(ㄇㄛˋ)汁(ㄓ)",e:"images/m_ink.jpg"}]},
+            {b:"ㄈ",v:[{t:"飛(ㄈㄟ)呀(ㄧㄚ)飛(ㄈㄟ)",e:"images/f_fly.jpg"},{t:"肥(ㄈㄟ)皂(ㄗㄠˋ)",e:"images/f_soap.jpg"},{t:"帆(ㄈㄢˊ)船(ㄔㄨㄢˊ)",e:"images/f_boat.jpg"}]},
+            {b:"ㄉ",v:[{t:"搭(ㄉㄚ)火(ㄏㄨㄛˇ)車(ㄔㄜ)",e:"images/d_train.jpg"},{t:"刀(ㄉㄠ)子(ㄗ˙)",e:"images/d_knife.jpg"},{t:"蛋(ㄉㄢˋ)捲(ㄐㄩㄢˇ)",e:"images/d_roll.jpg"}]},
+            {b:"ㄊ",v:[{t:"踢(ㄊㄧ)踢(ㄊㄧ)腳(ㄐㄧㄠˇ)",e:"images/t_kick.jpg"},{t:"梯(ㄊㄧ)子(ㄗ˙)",e:"images/t_ladder.jpg"},{t:"黏(ㄋㄧㄢˊ)土(ㄊㄨˇ)",e:"images/t_clay.jpg"}]},
+            {b:"ㄋ",v:[{t:"捏(ㄋㄧㄝ)捏(ㄋㄧㄝ)臉(ㄌㄧㄢˇ)",e:"images/n_face.jpg"},{t:"女(ㄋㄩˇ)生(ㄕㄥ)",e:"images/n_girl.jpg"},{t:"奶(ㄋㄞˇ)瓶(ㄆㄧㄥˊ)",e:"images/n_bottle.jpg"}]},
+            {b:"ㄌ",v:[{t:"拉(ㄌㄚ)拉(ㄌㄚ)手(ㄕㄡˇ)",e:"images/l_hand.jpg"},{t:"辣(ㄌㄚˋ)椒(ㄐㄧㄠ)",e:"images/l_chili.jpg"},{t:"綠(ㄌㄩˋ)茶(ㄔㄚˊ)",e:"images/l_tea.jpg"}]},
+            {b:"ㄍ",v:[{t:"唱(ㄔㄤˋ)兒(ㄦˊ)歌(ㄍㄜ)",e:"images/g_sing.jpg"},{t:"鴿(ㄍㄜ)子(ㄗ˙)",e:"images/g_pigeon.jpg"},{t:"小(ㄒㄧㄠˇ)狗(ㄍㄡˇ)",e:"images/g_dog.jpg"}]},
+            {b:"ㄎ",v:[{t:"開(ㄎㄞ)開(ㄎㄞ)門(ㄇㄣˊ)",e:"images/k_door.jpg"},{t:"蝌(ㄎㄜ)蚪(ㄉㄡˇ)",e:"images/k_tadpole.jpg"},{t:"貝(ㄅㄟˋ)殼(ㄎㄜˊ)",e:"images/k_shell.jpg"}]},
+            {b:"ㄏ",v:[{t:"喝(ㄏㄜ)牛(ㄋㄧㄡˊ)奶(ㄋㄞˇ)",e:"images/h_milk.jpg"},{t:"河(ㄏㄜ)馬(ㄇㄚˇ)",e:"images/h_hippo.jpg"},{t:"水(ㄕㄨㄟˇ)壺(ㄏㄨˊ)",e:"images/h_kettle.jpg"}]},
+            {b:"ㄐ",v:[{t:"擠(ㄐㄧ)呀(ㄧㄚ)擠(ㄐㄧ)",e:"images/j_squeeze.jpg"},{t:"公(ㄍㄨㄥ)雞(ㄐㄧ)",e:"images/j_rooster.jpg"},{t:"機(ㄐㄧ)車(ㄔㄜ)",e:"images/j_scooter.jpg"}]},
+            {b:"ㄑ",v:[{t:"騎(ㄑㄧˊ)單(ㄉㄢ)車(ㄔㄜ)",e:"images/q_bike.jpg"},{t:"企(ㄑㄧˋ)鵝(ㄜˊ)",e:"images/q_penguin.jpg"},{t:"油(ㄧㄡˊ)漆(ㄑㄧ)",e:"images/q_paint.jpg"}]},
+            {b:"ㄒ",v:[{t:"洗(ㄒㄧ)洗(ㄒㄧ)手(ㄕㄡˇ)",e:"images/x_wash.jpg"},{t:"西(ㄒㄧ)瓜(ㄍㄨㄚ)",e:"images/x_watermelon.jpg"},{t:"吸(ㄒㄧ)管(ㄍㄨㄢˇ)",e:"images/x_straw.jpg"}]},
+            {b:"ㄓ",v:[{t:"織(ㄓ)毛(ㄇㄠˊ)衣(ㄧ)",e:"images/zh_knit.jpg"},{t:"蜘(ㄓ)蛛(ㄓㄨ)",e:"images/zh_spider.jpg"},{t:"戒(ㄐㄧㄝˋ)指(ㄓˇ)",e:"images/zh_ring.jpg"}]},
+            {b:"ㄔ",v:[{t:"吃(ㄔ)炒(ㄔㄠˇ)飯(ㄈㄢˋ)",e:"images/ch_rice.jpg"},{t:"湯(ㄊㄤ)匙(ㄔˊ)",e:"images/ch_spoon.jpg"},{t:"牙(ㄧㄚˊ)齒(ㄔˇ)",e:"images/ch_tooth.jpg"}]},
+            {b:"ㄖ",v:[{t:"揉(ㄖㄡˊ)麵(ㄇㄧㄢˋ)團(ㄊㄨㄢˊ)",e:"images/r_dough.jpg"},{t:"日(ㄖˋ)曆(ㄌㄧˋ)",e:"images/r_calendar.jpg"},{t:"生(ㄕㄥ)日(ㄖˋ)",e:"images/r_birthday.jpg"}]}
+        ];
+
+        let cur = null, idx = 0;
+        const $ = id => document.getElementById(id);
+
+        function playAudio(text) {
+            try {
+                if (!('speechSynthesis' in window)) return;
+                speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(String(text).replace(/\([^)]*\)/g, ''));
+                u.lang = 'zh-TW';
+                u.rate = 0.8;
+                speechSynthesis.speak(u);
+            } catch (e) {}
+        }
+
+        function show(id) {
+            ['menu', 'reviewList', 'reviewOne', 'quiz'].forEach(k => $(k).style.display = 'none');
+            $(id).style.display = (id === 'menu' ? 'flex' : 'flex');
+        }
+        function home() { show('menu'); }
+
+        function startReview() {
+            show('reviewList');
+            const g = $('pickGrid'); g.innerHTML = '';
+            data.forEach((it, i) => {
+                const b = document.createElement('button');
+                b.className = 'pick-card';
+                b.textContent = it.b;
+                b.onclick = () => openSym(i);
+                g.appendChild(b);
+            });
+        }
+
+        function openSym(i) {
+            idx = i; show('reviewOne');
+            const it = data[i];
+            $('bigSym').textContent = it.b;
+            const w = $('words'); w.innerHTML = '';
+            it.v.forEach(x => {
+                const d = document.createElement('div');
+                d.className = 'word-card';
+                d.innerHTML = '<img src="" alt=""><div class="wt"></div>';
+                d.querySelector('img').src = x.e;
+                d.lastChild.textContent = x.t;
+                d.onclick = () => playAudio(x.t);
+                w.appendChild(d);
+            });
+            playAudio(it.b);
+        }
+
+        function stepSym(d) {
+            openSym((idx + d + data.length) % data.length);
+        }
+
+        function startQuiz() {
+            show('quiz');
+            nextQ();
+        }
+
+        function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+        function nextQ() {
+            $('fb').textContent = '';
+            cur = pick(data);
+            $('target').textContent = cur.b;
+            playAudio(cur.b);
+            const right = pick(cur.v);
+            const wrong = [];
+            while (wrong.length < 2) {
+                const o = pick(data);
+                if (o.b !== cur.b) {
+                    const w = pick(o.v);
+                    if (!wrong.includes(w)) wrong.push(w);
+                }
+            }
+            const opts = [right, ...wrong].sort(() => Math.random() - .5);
+            const box = $('opts'); box.innerHTML = '';
+            opts.forEach(v => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.innerHTML = '<img src="" alt=""><span></span>';
+                b.querySelector('img').src = v.e;
+                b.lastChild.textContent = v.t;
+                b.onclick = () => check(v, right);
+                box.appendChild(b);
+            });
+        }
+
+        function check(sel, right) {
+            const f = $('fb');
+            if (sel === right) {
+                f.style.color = '#4CAF50';
+                f.textContent = '🎉 太棒了！答對囉！';
+                playAudio(sel.t);
+                setTimeout(nextQ, 1800);
+            } else {
+                f.style.color = '#FF5252';
+                f.textContent = '❌ 再試一次看看喔！';
+            }
+        }
+    </script>
+</body>
+</html>
